@@ -5,6 +5,12 @@
     /// </summary>
     public class Musics
     {
+        // Instance the lists of music genres & album musics
+        public Musics() { 
+            AlbumMusics = new HashSet<Albums>();
+            MusicGenres = new HashSet<Genres>();
+        }
+
         /// <summary>
         /// Primary key for the Musics' table
         /// </summary>
@@ -20,10 +26,10 @@
         /// </summary>
         public int ReleaseYear { get; set; }
 
-        //Navigation Properties
-        public ICollection<AlbumMusics> AlbumMusics { get; set; }
+        // Navigation Properties
+        public ICollection<Albums> AlbumMusics { get; set; }
 
-        public ICollection<MusicGenres> MusicGenres { get; set; }
+        public ICollection<Genres> MusicGenres { get; set; }
 
     }
 }

@@ -5,6 +5,11 @@
     /// </summary>
     public class Genres
     {
+        // Instance the list of music genres
+        public Genres() { 
+            MusicGenres = new HashSet<Musics>();
+        }
+
         /// <summary>
         /// Primary key for the Genres' table
         /// </summary>
@@ -15,7 +20,7 @@
         /// </summary>
         public string Title { get; set; }
 
-        //Navigation Properties
-        public ICollection<MusicGenres> MusicGenres { get; set; }
+        // Navigation Properties
+        public ICollection<Musics> MusicGenres { get; set; }
     }
 }

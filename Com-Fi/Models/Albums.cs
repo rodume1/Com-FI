@@ -5,6 +5,11 @@
     /// </summary>
     public class Albums
     {
+        // Instance the list of album musics
+        public Albums() { 
+            AlbumMusics = new HashSet<Musics>();
+        }
+
         /// <summary>
         /// Primary key for the Albums' table
         /// </summary>
@@ -25,8 +30,8 @@
         /// </summary>
         public String Cover { get; set; }
 
-        //Navigation Properties
-        public ICollection<AlbumMusics> AlbumMusics { get; set; }
+        // Navigation Properties
+        public ICollection<Musics> AlbumMusics { get; set; }
 
     }
 }
