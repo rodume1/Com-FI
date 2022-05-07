@@ -4,6 +4,7 @@ using Com_Fi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Com_Fi.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220507093020_DatabaseCreation")]
+    partial class DatabaseCreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +23,6 @@ namespace Com_Fi.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("AlbumsArtists", b =>
-                {
-                    b.Property<int>("AlbumArtistsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AlbumArtistsId1")
-                        .HasColumnType("int");
-
-                    b.HasKey("AlbumArtistsId", "AlbumArtistsId1");
-
-                    b.HasIndex("AlbumArtistsId1");
-
-                    b.ToTable("AlbumsArtists");
-                });
 
             modelBuilder.Entity("AlbumsMusics", b =>
                 {
@@ -60,6 +47,9 @@ namespace Com_Fi.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int?>("ArtistsId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Cover")
                         .HasColumnType("nvarchar(max)");
 
@@ -70,6 +60,8 @@ namespace Com_Fi.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ArtistsId");
 
                     b.ToTable("Albums");
                 });
@@ -372,21 +364,6 @@ namespace Com_Fi.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("AlbumsArtists", b =>
-                {
-                    b.HasOne("Com_Fi.Models.Albums", null)
-                        .WithMany()
-                        .HasForeignKey("AlbumArtistsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Com_Fi.Models.Artists", null)
-                        .WithMany()
-                        .HasForeignKey("AlbumArtistsId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AlbumsMusics", b =>
                 {
                     b.HasOne("Com_Fi.Models.Albums", null)
@@ -400,6 +377,13 @@ namespace Com_Fi.Data.Migrations
                         .HasForeignKey("AlbumMusicsId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Com_Fi.Models.Albums", b =>
+                {
+                    b.HasOne("Com_Fi.Models.Artists", null)
+                        .WithMany("AlbumArtists")
+                        .HasForeignKey("ArtistsId");
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Comments", b =>
@@ -475,6 +459,11 @@ namespace Com_Fi.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Com_Fi.Models.Artists", b =>
+                {
+                    b.Navigation("AlbumArtists");
                 });
 #pragma warning restore 612, 618
         }

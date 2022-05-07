@@ -8,6 +8,7 @@
         // Instance the list of album musics
         public Albums() { 
             AlbumMusics = new HashSet<Musics>();
+            AlbumArtists = new HashSet<Artists>();
         }
 
         /// <summary>
@@ -32,6 +33,7 @@
 
         // Navigation Properties
         public ICollection<Musics> AlbumMusics { get; set; }
+        public ICollection<Artists> AlbumArtists { get; set; }
 
     }
 }
