@@ -13,10 +13,12 @@ namespace Com_Fi.Controllers
     public class AlbumsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AlbumsController(ApplicationDbContext context)
+        public AlbumsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Albums
@@ -54,14 +56,56 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums albums)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(albums);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums albums, IFormFile albumCover) {
+            if (albumCover == null) {
+                albums.Cover = "defaultCover.png";
+            } else {
+                if (!(albumCover.ContentType == "image/jpeg" || albumCover.ContentType == "image/png")) {
+                    // write the error message
+                    ModelState.AddModelError("", "Please, provide an image of one of the these types: .jpeg or .png.");
+                    // resend control to view, with data provided by user
+                    return View(albums);
+                } else {
+                    // define image name
+                    Guid g;
+                    g = Guid.NewGuid();
+                    string imageName = albums.Id + "_" + g.ToString();
+                    string extensionOfImage = Path.GetExtension(albumCover.FileName).ToLower();
+                    imageName += extensionOfImage;
+                    // add image name to vet data
+                    albums.Cover = imageName;
+                }
             }
+
+            if (ModelState.IsValid) {
+                try {
+                    _context.Add(albums);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                } catch(Exception) {
+                    ModelState.AddModelError("", "Something went wrong. I can not store data on database");
+                    return View(albums);
+                }
+            }
+
+            // save image file to disk
+            // ********************************
+            if (albumCover != null)
+            {
+                // ask the server what address it wants to use
+                string addressToStoreFile = _webHostEnvironment.WebRootPath;
+                string newImageLocalization = Path.Combine(addressToStoreFile, "Photos");
+                // see if the folder 'Photos' exists
+                if (!Directory.Exists(newImageLocalization))
+                {
+                    Directory.CreateDirectory(newImageLocalization);
+                }
+                // save image file to disk
+                newImageLocalization = Path.Combine(newImageLocalization, albums.Cover);
+                using var stream = new FileStream(newImageLocalization, FileMode.Create);
+                await albumCover.CopyToAsync(stream);
+            }
+
             return View(albums);
         }
 
