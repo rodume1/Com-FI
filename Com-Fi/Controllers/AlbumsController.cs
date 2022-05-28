@@ -58,7 +58,7 @@ namespace Com_Fi.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums albums, IFormFile albumCover) {
             if (albumCover == null) {
-                albums.Cover = "defaultCover.png";
+                albums.Cover = "defaultCover.jpg";
             } else {
                 if (!(albumCover.ContentType == "image/jpeg" || albumCover.ContentType == "image/png")) {
                     // write the error message
@@ -77,33 +77,26 @@ namespace Com_Fi.Controllers
                 }
             }
 
-            if (ModelState.IsValid) {
-                try {
-                    _context.Add(albums);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                } catch(Exception) {
-                    ModelState.AddModelError("", "Something went wrong. I can not store data on database");
-                    return View(albums);
-                }
-            }
-
-            // save image file to disk
-            // ********************************
-            if (albumCover != null)
+            // validate if data provided by user is good...
+            if (ModelState.IsValid)
             {
-                // ask the server what address it wants to use
-                string addressToStoreFile = _webHostEnvironment.WebRootPath;
-                string newImageLocalization = Path.Combine(addressToStoreFile, "Photos");
-                // see if the folder 'Photos' exists
-                if (!Directory.Exists(newImageLocalization))
-                {
-                    Directory.CreateDirectory(newImageLocalization);
-                }
+                // add vet data to database
+                _context.Add(albums);
+                // commit
+                await _context.SaveChangesAsync();
+
                 // save image file to disk
-                newImageLocalization = Path.Combine(newImageLocalization, albums.Cover);
-                using var stream = new FileStream(newImageLocalization, FileMode.Create);
-                await albumCover.CopyToAsync(stream);
+                // ********************************
+                // ask the server what address it wants to use
+                if (albums.Cover != "defaultCover.jpg")
+                {
+                    string addressToStoreFile = _webHostEnvironment.WebRootPath;
+                    string newImageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", albums.Cover);
+                    // save image file to disk
+                    using var stream = new FileStream(newImageLocalization, FileMode.Create);
+                    await albumCover.CopyToAsync(stream);
+                }
+                return RedirectToAction(nameof(Index));
             }
 
             return View(albums);
@@ -190,6 +183,21 @@ namespace Com_Fi.Controllers
             var albums = await _context.Albums.FindAsync(id);
             if (albums != null)
             {
+                string addressToStoreFile = _webHostEnvironment.WebRootPath;
+                string imageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", albums.Cover);
+                
+                if (albums.Cover != "defaultCover.jpg" && System.IO.File.Exists(imageLocalization))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(imageLocalization);
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+                }
                 _context.Albums.Remove(albums);
             }
             

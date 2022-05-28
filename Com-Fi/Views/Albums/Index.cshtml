@@ -34,7 +34,12 @@
                 @Html.DisplayFor(modelItem => item.ReleaseYear)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Cover)
+                <img
+                    src="~/Photos/Albums/@item.Cover"
+                    alt="photo of vet: @Html.DisplayFor(modelItem => item.Title)"
+                    title="@item.Title"
+                    height="50"
+                />
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
