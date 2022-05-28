@@ -34,7 +34,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("AlbumArtistsId1");
 
-                    b.ToTable("AlbumsArtists");
+                    b.ToTable("AlbumsArtists", (string)null);
                 });
 
             modelBuilder.Entity("AlbumsMusics", b =>
@@ -49,7 +49,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("AlbumMusicsId1");
 
-                    b.ToTable("AlbumsMusics");
+                    b.ToTable("AlbumsMusics", (string)null);
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Albums", b =>
@@ -71,7 +71,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Albums");
+                    b.ToTable("Albums", (string)null);
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Artists", b =>
@@ -87,7 +87,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artists");
+                    b.ToTable("Artists", (string)null);
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Comments", b =>
@@ -117,7 +117,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Genres", b =>
@@ -133,7 +133,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
 
                     b.HasData(
                         new
@@ -179,7 +179,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Musics");
+                    b.ToTable("Musics", (string)null);
                 });
 
             modelBuilder.Entity("GenresMusics", b =>
@@ -194,7 +194,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("MusicGenresId1");
 
-                    b.ToTable("GenresMusics");
+                    b.ToTable("GenresMusics", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
