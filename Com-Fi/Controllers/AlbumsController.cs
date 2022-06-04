@@ -56,42 +56,42 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums albums, IFormFile albumCover) {
+        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums album, IFormFile albumCover) {
             if (albumCover == null) {
-                albums.Cover = "defaultCover.jpg";
+                album.Cover = "defaultCover.jpg";
             } else {
                 if (!(albumCover.ContentType == "image/jpeg" || albumCover.ContentType == "image/png")) {
                     // write the error message
                     ModelState.AddModelError("", "Please, provide an image of one of the these types: .jpeg or .png.");
                     // resend control to view, with data provided by user
-                    return View(albums);
+                    return View(album);
                 } else {
-                    // define image name
+                    // define image's name
                     Guid g;
                     g = Guid.NewGuid();
-                    string imageName = albums.Id + "_" + g.ToString();
+                    string imageName = album.Id + "_" + g.ToString();
                     string extensionOfImage = Path.GetExtension(albumCover.FileName).ToLower();
                     imageName += extensionOfImage;
-                    // add image name to vet data
-                    albums.Cover = imageName;
+                    // add image name to album's data
+                    album.Cover = imageName;
                 }
             }
 
             // validate if data provided by user is good...
             if (ModelState.IsValid)
             {
-                // add vet data to database
-                _context.Add(albums);
+                // add album data to database
+                _context.Add(album);
                 // commit
                 await _context.SaveChangesAsync();
 
                 // save image file to disk
                 // ********************************
                 // ask the server what address it wants to use
-                if (albums.Cover != "defaultCover.jpg")
+                if (album.Cover != "defaultCover.jpg")
                 {
                     string addressToStoreFile = _webHostEnvironment.WebRootPath;
-                    string newImageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", albums.Cover);
+                    string newImageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", album.Cover);
                     // save image file to disk
                     using var stream = new FileStream(newImageLocalization, FileMode.Create);
                     await albumCover.CopyToAsync(stream);
@@ -99,7 +99,7 @@ namespace Com_Fi.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(albums);
+            return View(album);
         }
 
         // GET: Albums/Edit/5
@@ -110,12 +110,12 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var albums = await _context.Albums.FindAsync(id);
-            if (albums == null)
+            var album = await _context.Albums.FindAsync(id);
+            if (album == null)
             {
                 return NotFound();
             }
-            return View(albums);
+            return View(album);
         }
 
         // POST: Albums/Edit/5
@@ -123,23 +123,87 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseYear,Cover")] Albums albums)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseYear,Cover")] Albums album, IFormFile albumCover)
         {
-            if (id != albums.Id)
+            /*
+             * "Clones" the current data on the database to this object.
+             * This needs to be done to compare whether the image was or wasn't changed
+             */
+            var albumData = _context.Albums.AsNoTracking().SingleOrDefault(alb => alb.Id == id);
+
+            if (id != album.Id)
             {
                 return NotFound();
+            }
+
+            if (albumCover != null)
+            {
+                if (!(albumCover.ContentType == "image/jpeg" || albumCover.ContentType == "image/png"))
+                {
+                    // write the error message
+                    ModelState.AddModelError("", "Por favor, introduza ficheiros do tipo \".jpeg\" ou \".png.\"");
+                    // resend control to view, with data provided by user
+                    return View(album);
+                } else
+                {
+                    // define new image's name
+                    Guid g;
+                    g = Guid.NewGuid();
+                    string imageName = album.Id + "_" + g.ToString();
+                    string extensionOfImage = Path.GetExtension(albumCover.FileName).ToLower();
+                    imageName += extensionOfImage;
+                    // add image name to album's data
+                    album.Cover = imageName;
+                }
+            } else
+            {
+                // if no image was selected on edit, then it is meant to maitain the same image
+                album.Cover = albumData.Cover;
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(albums);
+                    _context.Update(album);
                     await _context.SaveChangesAsync();
+
+                    string addressToStoreFile = _webHostEnvironment.WebRootPath; // where to store the img (general path)
+
+                    // save image file to disk
+                    // ********************************
+                    // ask the server what address it wants to use
+                    if (album.Cover != "defaultCover.jpg" && albumCover != null)
+                    {
+                        // gets the localization of the "previous" image in order to delete it.
+                        // whether the image inserted was the same as before, we delete the image
+                        // because there is no way to compare its name with the current one.
+                        // (if there is, it is overcomplicated.)
+                        string imageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", albumData.Cover);
+
+                        // deletes "current image" (as in: the image that was stored at the moment of insert or last edited)
+                        if (albumData.Cover != "defaultCover.jpg" && System.IO.File.Exists(imageLocalization))
+                        {
+                            try
+                            {
+                                System.IO.File.Delete(imageLocalization);
+                            }
+                            catch (Exception)
+                            {
+
+                                throw;
+                            }
+                        }
+
+                        string newImageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", album.Cover);
+                        // save image file to disk
+                        using var stream = new FileStream(newImageLocalization, FileMode.Create);
+                        await albumCover.CopyToAsync(stream);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AlbumsExists(albums.Id))
+                    if (!AlbumsExists(album.Id))
                     {
                         return NotFound();
                     }
@@ -148,9 +212,11 @@ namespace Com_Fi.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(albums);
+
+            return View(album);
         }
 
         // GET: Albums/Delete/5
@@ -161,14 +227,14 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var albums = await _context.Albums
+            var album = await _context.Albums
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (albums == null)
+            if (album == null)
             {
                 return NotFound();
             }
 
-            return View(albums);
+            return View(album);
         }
 
         // POST: Albums/Delete/5
@@ -180,13 +246,21 @@ namespace Com_Fi.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Albums'  is null.");
             }
-            var albums = await _context.Albums.FindAsync(id);
-            if (albums != null)
+            var album = await _context.Albums.FindAsync(id);
+            if (album != null)
             {
                 string addressToStoreFile = _webHostEnvironment.WebRootPath;
-                string imageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", albums.Cover);
+
+                // If, for some reason, one album has the cover as null,
+                // sets its cover to the default so the application does not stop working
+                if (album.Cover == null)
+                {
+                    album.Cover = "defaultCover.jpg";
+                }
+
+                string imageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", album.Cover);
                 
-                if (albums.Cover != "defaultCover.jpg" && System.IO.File.Exists(imageLocalization))
+                if (album.Cover != "defaultCover.jpg" && System.IO.File.Exists(imageLocalization))
                 {
                     try
                     {
@@ -198,7 +272,7 @@ namespace Com_Fi.Controllers
                         throw;
                     }
                 }
-                _context.Albums.Remove(albums);
+                _context.Albums.Remove(album);
             }
             
             await _context.SaveChangesAsync();
