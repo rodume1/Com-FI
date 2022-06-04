@@ -10,7 +10,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>( //builder.Services.AddDefaultIdentity<IdentityUser>(
+    options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityBuilder>()  // this is necessary to use 'Roles' in our app
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 

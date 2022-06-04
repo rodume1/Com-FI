@@ -8,6 +8,7 @@
         // Instance the list of album artist
         public Artists() { 
             AlbumArtists = new HashSet<Albums>();
+            CommentArtists = new HashSet<Comments>();
         }
 
         /// <summary>
@@ -22,6 +23,11 @@
 
         // Navigation properties
         public ICollection<Albums> AlbumArtists { get; set; }
+        public ICollection<Comments> CommentArtists { get; set; }
 
+        /// <summary>
+        /// identificação a autenticação do artista
+        /// </summary>
+        public string UserId { get; set; }
     }
 }
