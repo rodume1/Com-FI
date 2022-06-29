@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Com_Fi.Data;
 using Com_Fi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Com_Fi.Controllers
 {
+    // [Authorize]
     public class AlbumsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -35,14 +37,14 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var albums = await _context.Albums
+            var album = await _context.Albums
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (albums == null)
+            if (album == null)
             {
                 return NotFound();
             }
 
-            return View(albums);
+            return View(album);
         }
 
         // GET: Albums/Create

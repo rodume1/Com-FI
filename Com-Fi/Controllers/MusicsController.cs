@@ -5,17 +5,26 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Com_Fi.Data;
 using Com_Fi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Com_Fi.Controllers
 {
+
+    // [Authorize]
     public class MusicsController : Controller
     {
+        /// <summary>
+        /// gets all data from authenticated user
+        /// </summary>
+        // private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
         public MusicsController(ApplicationDbContext context)
         {
+            // _userManager = userManager;
             _context = context;
         }
 
@@ -33,14 +42,14 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var musics = await _context.Musics
+            var music = await _context.Musics
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (musics == null)
+            if (music == null)
             {
                 return NotFound();
             }
 
-            return View(musics);
+            return View(music);
         }
 
         // GET: Musics/Create
@@ -54,15 +63,18 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear")] Musics musics)
+        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear")] Musics music)
         {
+            // gets all the information about the logged (authenticated) user
+            // string userID = _userManager.GetUserId(User);
+
             if (ModelState.IsValid)
             {
-                _context.Add(musics);
+                _context.Add(music);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(musics);
+            return View(music);
         }
 
         // GET: Musics/Edit/5
@@ -73,12 +85,12 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var musics = await _context.Musics.FindAsync(id);
-            if (musics == null)
+            var music = await _context.Musics.FindAsync(id);
+            if (music == null)
             {
                 return NotFound();
             }
-            return View(musics);
+            return View(music);
         }
 
         // POST: Musics/Edit/5
@@ -86,9 +98,9 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseYear")] Musics musics)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseYear")] Musics music)
         {
-            if (id != musics.Id)
+            if (id != music.Id)
             {
                 return NotFound();
             }
@@ -97,12 +109,12 @@ namespace Com_Fi.Controllers
             {
                 try
                 {
-                    _context.Update(musics);
+                    _context.Update(music);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MusicsExists(musics.Id))
+                    if (!MusicsExists(music.Id))
                     {
                         return NotFound();
                     }
@@ -113,7 +125,7 @@ namespace Com_Fi.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(musics);
+            return View(music);
         }
 
         // GET: Musics/Delete/5
@@ -124,14 +136,14 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var musics = await _context.Musics
+            var music = await _context.Musics
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (musics == null)
+            if (music == null)
             {
                 return NotFound();
             }
 
-            return View(musics);
+            return View(music);
         }
 
         // POST: Musics/Delete/5
@@ -143,10 +155,10 @@ namespace Com_Fi.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Musics'  is null.");
             }
-            var musics = await _context.Musics.FindAsync(id);
-            if (musics != null)
+            var music = await _context.Musics.FindAsync(id);
+            if (music != null)
             {
-                _context.Musics.Remove(musics);
+                _context.Musics.Remove(music);
             }
             
             await _context.SaveChangesAsync();
