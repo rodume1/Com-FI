@@ -4,6 +4,7 @@ using Com_Fi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Com_Fi.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220611101749_changeDatabaseName")]
+    partial class changeDatabaseName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -278,14 +280,14 @@ namespace Com_Fi.Data.Migrations
                         new
                         {
                             Id = "u",
-                            ConcurrencyStamp = "8d55d3a5-2cdf-4999-b2e9-36f440432728",
+                            ConcurrencyStamp = "00fbb071-b3ec-4493-951a-341bb14f5b17",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
                             Id = "a",
-                            ConcurrencyStamp = "55039a06-3e81-40b8-a971-2353cb4db6d5",
+                            ConcurrencyStamp = "d6103158-83e9-4ada-ac6a-82fb536e20cf",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
