@@ -34,5 +34,10 @@ namespace Com_Fi.Models
         /// </summary>
         public bool Visible { get; set; }
 
+        /// <summary>
+        /// Autor do comentário
+        /// </summary>
+        public string UserId { get; set; }
+
     }
 }

@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Com_Fi.Data;
 using Com_Fi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Com_Fi.Controllers
 {
+    [Authorize(Roles = "Veterinary,Administrative")]
     public class ArtistsController : Controller
     {
         private readonly ApplicationDbContext _context;
