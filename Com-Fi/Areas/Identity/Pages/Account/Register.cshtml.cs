@@ -31,18 +31,12 @@ namespace Com_Fi.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
-        /// <summary>
-        /// creates a 'connection' to our database
-        /// </summary>
-        private readonly ApplicationDbContext _context;
-
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender,
-            ApplicationDbContext context)
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -50,7 +44,6 @@ namespace Com_Fi.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
-            _context = context;
         }
 
         /// <summary>
@@ -92,7 +85,7 @@ namespace Com_Fi.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "A {0} tem de ter pelo menos {2} e no máximo {1} characteres.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
@@ -103,25 +96,8 @@ namespace Com_Fi.Areas.Identity.Pages.Account
             /// </summary>
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "A password e a password de confirmação têm de ser iguais.")]
+            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
-
-            /// <summary>
-            ///     This represents the user Name
-            /// </summary>
-            [Required]
-            [RegularExpression("[A-ZÂÓÍa-záéíóúàèìòùâêîôûãõäëïöüñç '-]+", ErrorMessage = "Só pode escrever letras no {0}")]
-            [StringLength(100, ErrorMessage = "O {0} tem de ter pelo menos {2} e no máximo {1} characteres.", MinimumLength = 2)]
-            [Display(Name = "Nome do utilizador")]
-            public string Name { get; set; }
-
-            /// <summary>
-            ///     This represents the user Role
-            /// </summary>
-            [Required]
-            [Display(Name = "Tipo de utilizador")]
-            [RegularExpression("[ua]", ErrorMessage = "Por favor selecione uma das opções.")]
-            public string Role { get; set; }
         }
 
 
@@ -141,34 +117,14 @@ namespace Com_Fi.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-                user.Name = Input.Name;
-                user.RegistrationDate = DateTime.Now;
-
                 var result = await _userManager.CreateAsync(user, Input.Password);
-
-                // add Name and RegistrationDate to the 'user
-                user.Name = Input.Name;
-                user.RegistrationDate = DateTime.Now;
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // we chose a switch case because if roles are added we can add more cases.
-                    // we could use different statements, like an if-else but that would be more complicated to understand
-                    // this was purely a decision to try to make code cleaner and more "readable"
-                    switch (Input.Role)
-                    {
-                        case "a":
-                            await _userManager.AddToRoleAsync(user, "Artist");
-                            break;
-                        case "u":
-                            await _userManager.AddToRoleAsync(user, "User");
-                            break;
-                        default: 
-                            break;
-                    }
+                    // all users registed by this way are 'Clients'
+                    await _userManager.AddToRoleAsync(user, "Client");
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

@@ -278,14 +278,14 @@ namespace Com_Fi.Data.Migrations
                         new
                         {
                             Id = "u",
-                            ConcurrencyStamp = "8d55d3a5-2cdf-4999-b2e9-36f440432728",
+                            ConcurrencyStamp = "d7edff8f-f9ca-4883-b1a8-67c5c0ed9abd",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
                             Id = "a",
-                            ConcurrencyStamp = "55039a06-3e81-40b8-a971-2353cb4db6d5",
+                            ConcurrencyStamp = "2e7fe702-feeb-4dda-9c45-3dd5bb1a568d",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
