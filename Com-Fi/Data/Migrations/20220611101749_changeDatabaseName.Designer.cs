@@ -4,6 +4,7 @@ using Com_Fi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Com_Fi.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220611101749_changeDatabaseName")]
+    partial class changeDatabaseName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +36,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("AlbumArtistsId1");
 
-                    b.ToTable("AlbumsArtists", (string)null);
+                    b.ToTable("AlbumsArtists");
                 });
 
             modelBuilder.Entity("AlbumsMusics", b =>
@@ -49,7 +51,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("AlbumMusicsId1");
 
-                    b.ToTable("AlbumsMusics", (string)null);
+                    b.ToTable("AlbumsMusics");
                 });
 
             modelBuilder.Entity("Com_Fi.Data.ApplicationUser", b =>
@@ -143,7 +145,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Albums", (string)null);
+                    b.ToTable("Albums");
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Artists", b =>
@@ -162,7 +164,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artists", (string)null);
+                    b.ToTable("Artists");
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Comments", b =>
@@ -195,7 +197,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Genres", b =>
@@ -211,34 +213,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Title = "Jazz"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Title = "Blues"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Title = "Rock"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Title = "Folk"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Title = "Classical"
-                        });
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("Com_Fi.Models.Musics", b =>
@@ -257,7 +232,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Musics", (string)null);
+                    b.ToTable("Musics");
                 });
 
             modelBuilder.Entity("GenresMusics", b =>
@@ -272,7 +247,7 @@ namespace Com_Fi.Data.Migrations
 
                     b.HasIndex("MusicGenresId1");
 
-                    b.ToTable("GenresMusics", (string)null);
+                    b.ToTable("GenresMusics");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -305,14 +280,14 @@ namespace Com_Fi.Data.Migrations
                         new
                         {
                             Id = "u",
-                            ConcurrencyStamp = "8d55d3a5-2cdf-4999-b2e9-36f440432728",
+                            ConcurrencyStamp = "00fbb071-b3ec-4493-951a-341bb14f5b17",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
                             Id = "a",
-                            ConcurrencyStamp = "55039a06-3e81-40b8-a971-2353cb4db6d5",
+                            ConcurrencyStamp = "d6103158-83e9-4ada-ac6a-82fb536e20cf",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });

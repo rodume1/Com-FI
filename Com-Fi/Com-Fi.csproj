@@ -9,37 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\NewFolder1\**" />
-    <Compile Remove="wwwroot\NewFolder\**" />
-    <Content Remove="wwwroot\NewFolder1\**" />
-    <Content Remove="wwwroot\NewFolder\**" />
-    <EmbeddedResource Remove="wwwroot\NewFolder1\**" />
-    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
-    <None Remove="wwwroot\NewFolder1\**" />
-    <None Remove="wwwroot\NewFolder\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="Areas\Identity\Pages\_AnonymousLayout.cshtml" />
-    <Content Remove="Views\Home\Anonymous.cshtml" />
-    <Content Remove="Views\Home\Anonymous.razor" />
-    <Content Remove="Views\Home\Index - Copy %282%29.cshtml" />
-    <Content Remove="Views\Home\Index - Copy.cshtml" />
-    <Content Remove="Views\Shared\_AnonymousLayout.cshtml" />
-    <Content Remove="Views\Shared\_Layout - Copy %282%29.cshtml" />
-    <Content Remove="Views\Shared\_Layout - Copy.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Views\Shared\_AnonymousLayout.cshtml.css" />
-    <None Remove="Views\Shared\_Layout - Copy %282%29.cshtml.css" />
-    <None Remove="Views\Shared\_Layout - Copy.cshtml.css" />
+    <Content Remove="Views\Home\Privacy.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.5">
       <PrivateAssets>all</PrivateAssets>
