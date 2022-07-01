@@ -1,0 +1,71 @@
+﻿@model IEnumerable<Com_Fi.Models.Albums>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+@* displays an error message, if needed *@
+<h2 style="color: #ff0000">@Html.ValidationMessage("CustomError")</h2>
+<p>
+    @if (User.Identity.IsAuthenticated && User.IsInRole("Artist")) {
+        <a asp-action="Create">Novo album</a>
+    }
+</p>
+@if (User.Identity.IsAuthenticated && User.IsInRole("Artist")) {
+    <text>
+        <a asp-action="Index" asp-route-sort="all">Listar todos</a>
+        <a asp-action="Index" asp-route-sort="mine">Listar apenas os meus</a>
+    </text>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReleaseYear)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Cover)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReleaseYear)
+            </td>
+            <td>
+                <img
+                    src="~/Photos/Albums/@item.Cover"
+                    alt="photo of artist: @Html.DisplayFor(modelItem => item.Title)"
+                    title="@item.Title"
+                    height="50"
+                />
+            </td>
+            <td>
+                @if (User.Identity.IsAuthenticated && User.IsInRole("Artist"))
+                {
+                    <text>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Detalhes</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </text>
+                } else if (User.Identity.IsAuthenticated)
+                {
+                    <text>
+                        <a asp-action="Details" asp-route-id="@item.Id">Detalhes</a>   
+                    </text>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

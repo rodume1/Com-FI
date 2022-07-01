@@ -9,6 +9,12 @@
 *.user
 *.userosscache
 *.sln.docstates
+Photos/Albums/
+Photos/Artists/
+
+!Photos/Albums/DefaultCover.jgp
+*.jpg
+*.png
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

@@ -29,7 +29,7 @@
         /// <summary>
         /// The image of the Albums' cover 
         /// </summary>
-        public String Cover { get; set; }
+        public string Cover { get; set; }
 
         // Navigation Properties
         public ICollection<Musics> AlbumMusics { get; set; }

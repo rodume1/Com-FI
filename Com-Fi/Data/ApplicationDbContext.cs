@@ -44,6 +44,15 @@ namespace Com_Fi.Data
             //*****************************************
             // add, at this point, your new code
 
+            // create the seed of Genres table
+            modelBuilder.Entity<Genres>().HasData(
+               new Genres { Id = 1, Title = "Jazz" },
+               new Genres { Id = 2, Title = "Blues" },
+               new Genres { Id = 3, Title = "Rock" },
+               new Genres { Id = 4, Title = "Folk" },
+               new Genres { Id = 5, Title = "Classical" }
+            );
+
             // seed the Roles data
             modelBuilder.Entity<IdentityRole>().HasData(
               new IdentityRole { Id = "u", Name = "User", NormalizedName = "USER" },
