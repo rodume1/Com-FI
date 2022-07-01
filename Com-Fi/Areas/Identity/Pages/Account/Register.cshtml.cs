@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Com_Fi.Models;
 
 namespace Com_Fi.Areas.Identity.Pages.Account
 {
@@ -162,6 +163,19 @@ namespace Com_Fi.Areas.Identity.Pages.Account
                     {
                         case "a":
                             await _userManager.AddToRoleAsync(user, "Artist");
+                            Artists artist = new Artists();
+                            try
+                            {
+                                artist.Name = user.Name;
+                                artist.UserId = user.Id;
+                                _context.Add(artist);
+                                await _context.SaveChangesAsync();
+                            }
+                            catch (Exception)
+                            {
+
+                                throw;
+                            }
                             break;
                         case "u":
                             await _userManager.AddToRoleAsync(user, "User");

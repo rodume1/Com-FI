@@ -8,28 +8,76 @@ using Microsoft.EntityFrameworkCore;
 using Com_Fi.Data;
 using Com_Fi.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Com_Fi.Controllers
 {
-    // [Authorize]
+    [Authorize(Roles = "Artist")]
     public class AlbumsController : Controller
     {
+        /// <summary>
+        /// reference the application database
+        /// </summary>
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AlbumsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        /// <summary>
+        /// gets all data from authenticated user
+        /// </summary>
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public AlbumsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _userManager = userManager;
         }
 
         // GET: Albums
-        public async Task<IActionResult> Index()
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string sort, string errorMessage)
         {
-              return View(await _context.Albums.ToListAsync());
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+            // all albums
+            var albums = await _context.Albums.ToListAsync();
+
+            // if there is an error message, displays it to client
+            if (errorMessage != null)
+            {
+                ModelState.AddModelError("CustomError", errorMessage);
+            }
+            /**
+             * Returns data that user "asks" for
+             * options:
+             * - all: returns all data (all albums) [by Default]
+             * - mine: returns all data (all albums) that belongs for this user/artist
+             * 
+             * We chose a switch-case because we could add more "filters" without the overhead
+             * of having multiple if-else statements
+             */
+            switch (sort)
+            {
+                case "mine":
+                    // get the logged artist
+                    Artists artist = await _context
+                                            .Artists
+                                            .Where(a => a.UserId == userID)
+                                            .FirstOrDefaultAsync();
+                    // get all albums that belongs to this artist
+                    albums = await _context
+                                    .Albums
+                                    .Where(a => a.AlbumArtists.Contains(artist))
+                                    .ToListAsync();
+                    break;
+                default:
+                    break;
+            }
+            return View(albums);
         }
 
         // GET: Albums/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Albums == null)
@@ -82,23 +130,35 @@ namespace Com_Fi.Controllers
             // validate if data provided by user is good...
             if (ModelState.IsValid)
             {
-                // add album data to database
-                _context.Add(album);
-                // commit
-                await _context.SaveChangesAsync();
-
-                // save image file to disk
-                // ********************************
-                // ask the server what address it wants to use
-                if (album.Cover != "defaultCover.jpg")
+                // add user (artist) to album
+                string userID = _userManager.GetUserId(User);
+                Artists artist = await _context.Artists.Where(a => a.UserId == userID).FirstOrDefaultAsync();
+                album.AlbumArtists.Add(artist);
+                try
                 {
-                    string addressToStoreFile = _webHostEnvironment.WebRootPath;
-                    string newImageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", album.Cover);
+                    // add album data to database
+                    _context.Add(album);
+                    // commit
+                    await _context.SaveChangesAsync();
+
                     // save image file to disk
-                    using var stream = new FileStream(newImageLocalization, FileMode.Create);
-                    await albumCover.CopyToAsync(stream);
+                    // ********************************
+                    // ask the server what address it wants to use
+                    if (album.Cover != "defaultCover.jpg")
+                    {
+                        string addressToStoreFile = _webHostEnvironment.WebRootPath;
+                        string newImageLocalization = Path.Combine(addressToStoreFile, "Photos/Albums", album.Cover);
+                        // save image file to disk
+                        using var stream = new FileStream(newImageLocalization, FileMode.Create);
+                        await albumCover.CopyToAsync(stream);
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception)
+                {
+
+                    throw;
+                }
             }
 
             return View(album);
@@ -112,7 +172,24 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+
+            // get the logged artist
+            Artists artist = await _context.Artists
+                                           .Where(a => a.UserId == userID)
+                                           .FirstOrDefaultAsync();
+
             var album = await _context.Albums.FindAsync(id);
+            var albumData = _context.Albums
+                                    .AsNoTracking()
+                                    .Where(a => a.AlbumArtists.Contains(artist))
+                                    .SingleOrDefault(alb => alb.Id == id);
+            if (albumData == null)
+            {
+                // returns to "Index" with an error message
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível editar este album." });
+            }
             if (album == null)
             {
                 return NotFound();
@@ -127,11 +204,28 @@ namespace Com_Fi.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseYear,Cover")] Albums album, IFormFile albumCover)
         {
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+
+            // get the logged artist
+            Artists artist = await _context.Artists
+                                           .Where(a => a.UserId == userID)
+                                           .FirstOrDefaultAsync();
+
             /*
              * "Clones" the current data on the database to this object.
              * This needs to be done to compare whether the image was or wasn't changed
              */
-            var albumData = _context.Albums.AsNoTracking().SingleOrDefault(alb => alb.Id == id);
+            var albumData = _context.Albums
+                                    .AsNoTracking()
+                                    .Where(a => a.AlbumArtists.Contains(artist))
+                                    .SingleOrDefault(alb => alb.Id == id);
+
+            if (albumData == null)
+            {
+                // returns to "Index" with an error message
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível editar este album." });
+            }
 
             if (id != album.Id)
             {
@@ -229,8 +323,25 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var album = await _context.Albums
-                .FirstOrDefaultAsync(m => m.Id == id);
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+
+            // get the logged artist
+            Artists artist = await _context.Artists
+                                           .Where(a => a.UserId == userID)
+                                           .FirstOrDefaultAsync();
+
+            var album = await _context.Albums.FirstOrDefaultAsync(m => m.Id == id);
+
+            var albumData = _context.Albums
+                                    .AsNoTracking()
+                                    .Where(a => a.AlbumArtists.Contains(artist))
+                                    .SingleOrDefault(alb => alb.Id == id);
+            if (albumData == null)
+            {
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível eliminar este album." });
+            }
+
             if (album == null)
             {
                 return NotFound();
@@ -248,7 +359,26 @@ namespace Com_Fi.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Albums'  is null.");
             }
+
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+
+            // get the logged artist
+            Artists artist = await _context.Artists
+                                           .Where(a => a.UserId == userID)
+                                           .FirstOrDefaultAsync();
+
             var album = await _context.Albums.FindAsync(id);
+
+            var albumData = _context.Albums
+                                    .AsNoTracking()
+                                    .Where(a => a.AlbumArtists.Contains(artist))
+                                    .SingleOrDefault(alb => alb.Id == id);
+            if (albumData == null)
+            {
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível eliminar este album." });
+            }
+
             if (album != null)
             {
                 string addressToStoreFile = _webHostEnvironment.WebRootPath;
