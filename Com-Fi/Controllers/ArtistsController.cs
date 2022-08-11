@@ -72,15 +72,15 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Artists artists)
+        public async Task<IActionResult> Create([Bind("Id,Name")] Artists artist)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(artists);
+                _context.Add(artist);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(artists);
+            return View(artist);
         }
 
         // GET: Artists/Edit/5
@@ -104,7 +104,7 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Artists artists)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Artists artist)
         {
             // get user ID
             string userID = _userManager.GetUserId(User);
@@ -116,7 +116,7 @@ namespace Com_Fi.Controllers
                                      .SingleOrDefault(a => a.Id == id);
 
             // guarantees data's persistency
-            if (id != artists.Id)
+            if (id != artist.Id)
             {
                 return NotFound();
             }
@@ -134,7 +134,7 @@ namespace Com_Fi.Controllers
             try 
             {
                 // set new UserName
-                user.Name = artists.Name;
+                user.Name = artist.Name;
 
                 // update User
                 _context.Update(user);
@@ -149,13 +149,13 @@ namespace Com_Fi.Controllers
             {
                 try
                 {
-                    artists.UserId = artistData.UserId;
-                    _context.Update(artists);
+                    artist.UserId = artistData.UserId;
+                    _context.Update(artist);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ArtistsExists(artists.Id))
+                    if (!ArtistsExists(artist.Id))
                     {
                         return NotFound();
                     }
@@ -166,7 +166,7 @@ namespace Com_Fi.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(artists);
+            return View(artist);
         }
 
         // GET: Artists/Delete/5
@@ -177,14 +177,14 @@ namespace Com_Fi.Controllers
                 return NotFound();
             }
 
-            var artists = await _context.Artists
+            var artist = await _context.Artists
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (artists == null)
+            if (artist == null)
             {
                 return NotFound();
             }
 
-            return View(artists);
+            return View(artist);
         }
 
         // POST: Artists/Delete/5
@@ -211,10 +211,10 @@ namespace Com_Fi.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Artists'  is null.");
             }
-            var artists = await _context.Artists.FindAsync(id);
-            if (artists != null)
+            var artist = await _context.Artists.FindAsync(id);
+            if (artist != null)
             {
-                _context.Artists.Remove(artists);
+                _context.Artists.Remove(artist);
             }
 
             // get ApplicationUser with logged in user's ID
