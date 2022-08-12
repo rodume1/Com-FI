@@ -77,7 +77,7 @@ namespace Com_Fi.Controllers
                                             .Where(a => a.UserId == userID)
                                             .FirstOrDefaultAsync();
 
-                    // get all musics that belongs to this artist
+                    // get all albums that belongs to this artist
                     albums = await _context
                                     .Albums
                                     .Where(a => a.AlbumArtists.Contains(artist))
