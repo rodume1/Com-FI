@@ -12,7 +12,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Com_Fi.Controllers
 {
-    [Authorize(Roles = "Artist")]
+    /// <summary>
+    /// Albums controller, with all the methods used for albums (CRUD)
+    /// </summary>
     public class AlbumsController : Controller
     {
         /// <summary>
@@ -20,12 +22,22 @@ namespace Com_Fi.Controllers
         /// </summary>
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// all data about web hosting environment
+        /// </summary>
         private readonly IWebHostEnvironment _webHostEnvironment;
+
         /// <summary>
         /// gets all data from authenticated user
         /// </summary>
         private readonly UserManager<ApplicationUser> _userManager;
 
+        /// <summary>
+        /// Albums controller constructor
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="webHostEnvironment"></param>
+        /// <param name="userManager"></param>
         public AlbumsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager)
         {
             _context = context;
@@ -34,7 +46,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Albums
-        [AllowAnonymous]
+        [Authorize(Roles = "User,Artist")]
         public async Task<IActionResult> Index(string sort, string errorMessage)
         {
             // get user ID
@@ -64,11 +76,9 @@ namespace Com_Fi.Controllers
                                             .Artists
                                             .Where(a => a.UserId == userID)
                                             .FirstOrDefaultAsync();
-                    // get all albums that belongs to this artist
-                    albums = await _context
-                                    .Albums
-                                    .Where(a => a.AlbumArtists.Contains(artist))
-                                    .ToListAsync();
+
+                    // get all musics that belongs to this artist
+
                     break;
                 default:
                     break;
@@ -77,7 +87,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Albums/Details/5
-        [AllowAnonymous]
+        [Authorize(Roles = "User,Artist")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Albums == null)
@@ -86,6 +96,7 @@ namespace Com_Fi.Controllers
             }
 
             var album = await _context.Albums
+                .Include(a => a.AlbumMusics)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (album == null)
             {
@@ -96,8 +107,10 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Albums/Create
+        [Authorize(Roles = "Artist")]
         public IActionResult Create()
         {
+            ViewData["Musics"] = new SelectList(_context.Musics.OrderBy(m => m.Title), "Id", "Title");
             return View();
         }
 
@@ -106,13 +119,14 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums album, IFormFile albumCover) {
+        [Authorize(Roles = "Artist")]
+        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseYear,Cover")] Albums album, IFormFile albumCover, List<String> Musics) {
             if (albumCover == null) {
                 album.Cover = "defaultCover.jpg";
             } else {
                 if (!(albumCover.ContentType == "image/jpeg" || albumCover.ContentType == "image/png")) {
                     // write the error message
-                    ModelState.AddModelError("", "Please, provide an image of one of the these types: .jpeg or .png.");
+                    ModelState.AddModelError("", "Por favor, introduza uma imagem do tipo .jpeg ou .png.");
                     // resend control to view, with data provided by user
                     return View(album);
                 } else {
@@ -130,10 +144,45 @@ namespace Com_Fi.Controllers
             // validate if data provided by user is good...
             if (ModelState.IsValid)
             {
-                // add user (artist) to album
+                // get user ID
                 string userID = _userManager.GetUserId(User);
+
+                // get artist by user ID
                 Artists artist = await _context.Artists.Where(a => a.UserId == userID).FirstOrDefaultAsync();
+
+                // add user (artist) to album
                 album.AlbumArtists.Add(artist);
+
+                // checks if album was created empty (no musics associated)
+                if (Musics.Count() == 0)
+                {
+                    // write the error message
+                    ModelState.AddModelError("", "Não é possível criar um álbum vazio. Por favor, associe músicas ao mesmo.");
+
+                    // resend control to view, with data provided by user
+                    ViewData["Musics"] = new SelectList(_context.Musics.OrderBy(m => m.Title), "Id", "Title");
+                    return View(album);
+                }
+                // for all selected musics (in view)
+                foreach (var selectedMusic in Musics)
+                {
+                    // if selected music == "0" then we must return an error
+                    if (selectedMusic == "0")
+                    {
+                        // write the error message
+                        ModelState.AddModelError("", "Por favor, introduza as músicas corretamente.");
+
+                        // resend control to view, with data provided by user
+                        ViewData["Musics"] = new SelectList(_context.Musics.OrderBy(m => m.Title), "Id", "Title");
+                        return View(album);
+                    }
+
+                    // get music by ID
+                    Musics music = await _context.Musics.Where(m => m.Id == int.Parse(selectedMusic)).FirstOrDefaultAsync();
+
+                    // add music to AlbumMusics table (many-to-many relationship)
+                    album.AlbumMusics.Add(music);
+                }
                 try
                 {
                     // add album data to database
@@ -161,10 +210,12 @@ namespace Com_Fi.Controllers
                 }
             }
 
+            ViewData["Musics"] = new SelectList(_context.Musics.OrderBy(m => m.Title), "Id", "Title");
             return View(album);
         }
 
         // GET: Albums/Edit/5
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Albums == null)
@@ -180,11 +231,16 @@ namespace Com_Fi.Controllers
                                            .Where(a => a.UserId == userID)
                                            .FirstOrDefaultAsync();
 
+            // get album by id
             var album = await _context.Albums.FindAsync(id);
+
+            // album data that belongs to logged in artist
             var albumData = _context.Albums
                                     .AsNoTracking()
                                     .Where(a => a.AlbumArtists.Contains(artist))
                                     .SingleOrDefault(alb => alb.Id == id);
+
+            // there is no album with this ID
             if (albumData == null)
             {
                 // returns to "Index" with an error message
@@ -202,6 +258,7 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseYear,Cover")] Albums album, IFormFile albumCover)
         {
             // get user ID
@@ -316,6 +373,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Albums/Delete/5
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Albums == null)
@@ -353,6 +411,7 @@ namespace Com_Fi.Controllers
         // POST: Albums/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Albums == null)
@@ -368,8 +427,10 @@ namespace Com_Fi.Controllers
                                            .Where(a => a.UserId == userID)
                                            .FirstOrDefaultAsync();
 
+            // get album by id
             var album = await _context.Albums.FindAsync(id);
 
+            // data from album (that belongs to artist logged in)
             var albumData = _context.Albums
                                     .AsNoTracking()
                                     .Where(a => a.AlbumArtists.Contains(artist))
