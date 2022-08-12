@@ -4,10 +4,11 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
+<h1>Lista de artistas</h1>
+@* displays an error message, if needed *@
+<h2 style="color: #ff0000">@Html.ValidationMessage("CustomError")</h2>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Criar artista</a>
 </p>
 <table class="table">
     <thead>

@@ -38,9 +38,15 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Artists
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(String errorMessage)
         {
-              return View(await _context.Artists.ToListAsync());
+            // if there is an error message, displays it to client
+            if (errorMessage != null)
+            {
+                ModelState.AddModelError("CustomError", errorMessage);
+            }
+
+            return View(await _context.Artists.ToListAsync());
         }
 
         // GET: Artists/Details/5
@@ -86,17 +92,33 @@ namespace Com_Fi.Controllers
         // GET: Artists/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+
             if (id == null || _context.Artists == null)
             {
                 return NotFound();
             }
 
-            var artists = await _context.Artists.FindAsync(id);
-            if (artists == null)
+            Artists artist = await _context.Artists.FindAsync(id);
+
+            // artist data that represents the logged in user
+            var artistData = _context.Artists
+                                     .AsNoTracking()
+                                     .Where(a => a.UserId == userID)
+                                     .SingleOrDefault(a => a.Id == id);
+
+            if (artist == null)
             {
                 return NotFound();
             }
-            return View(artists);
+
+            if (artistData == null)
+            {
+                // returns to "Index" with an error message
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível editar este artista." });
+            }
+            return View(artist);
         }
 
         // POST: Artists/Edit/5
@@ -123,8 +145,9 @@ namespace Com_Fi.Controllers
 
             // only the user can edit their own details
             if (artistData == null) 
-            { 
-                return NotFound(); 
+            {
+                // returns to "Index" with an error message
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível editar este album." });
             }
 
             // updates the value of the user's name on the user table
@@ -172,13 +195,31 @@ namespace Com_Fi.Controllers
         // GET: Artists/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            // get user ID
+            string userID = _userManager.GetUserId(User);
+
             if (id == null || _context.Artists == null)
             {
                 return NotFound();
             }
 
-            var artist = await _context.Artists
+            Artists artist = await _context.Artists
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            // artist data that represents the logged in user
+            var artistData = _context.Artists
+                                     .AsNoTracking()
+                                     .Where(a => a.UserId == userID)
+                                     .SingleOrDefault(a => a.Id == id);
+
+            // only the user can edit their own details
+            if (artistData == null)
+            {
+                // returns to "Index" with an error message
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível eliminar este artista." });
+            }
+
+
             if (artist == null)
             {
                 return NotFound();
@@ -204,7 +245,8 @@ namespace Com_Fi.Controllers
             // only the user can delete their own account
             if (artistData == null)
             {
-                return NotFound();
+                // returns to "Index" with an error message
+                return RedirectToAction("Index", new { ErrorMessage = "Não é possível eliminar este artista." });
             }            
 
             if (_context.Artists == null)
