@@ -78,6 +78,10 @@ namespace Com_Fi.Controllers
                                             .FirstOrDefaultAsync();
 
                     // get all musics that belongs to this artist
+                    albums = await _context
+                                    .Albums
+                                    .Where(a => a.AlbumArtists.Contains(artist))
+                                    .ToListAsync();
 
                     break;
                 default:
