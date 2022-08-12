@@ -4,6 +4,7 @@ using Com_Fi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Com_Fi.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220801140101_NewMusicGenresModels")]
+    partial class NewMusicGenresModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,14 +300,14 @@ namespace Com_Fi.Data.Migrations
                         new
                         {
                             Id = "u",
-                            ConcurrencyStamp = "d8e50d93-ec2b-4f4c-ab04-46cd0b32503e",
+                            ConcurrencyStamp = "65ccddbc-4425-404d-8a42-b3c6f21a8bc7",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
                             Id = "a",
-                            ConcurrencyStamp = "9b2c68cd-33dd-48ae-b3a8-b2068adaf316",
+                            ConcurrencyStamp = "7a68bfa5-50d1-45ff-92b6-6bdc45aa9c6d",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -463,7 +465,7 @@ namespace Com_Fi.Data.Migrations
             modelBuilder.Entity("Com_Fi.Models.Musics", b =>
                 {
                     b.HasOne("Com_Fi.Models.Genres", "Genre")
-                        .WithMany("MusicGenres")
+                        .WithMany()
                         .HasForeignKey("GenreId");
 
                     b.Navigation("Genre");
@@ -523,11 +525,6 @@ namespace Com_Fi.Data.Migrations
             modelBuilder.Entity("Com_Fi.Models.Artists", b =>
                 {
                     b.Navigation("CommentArtists");
-                });
-
-            modelBuilder.Entity("Com_Fi.Models.Genres", b =>
-                {
-                    b.Navigation("MusicGenres");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,7 @@
-﻿namespace Com_Fi.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Com_Fi.Models
 {
     /// <summary>
     /// Represents the Genres' structure
@@ -6,9 +9,9 @@
     public class Genres
     {
         // Instance the list of music genres
-        public Genres() { 
-            MusicGenres = new HashSet<Musics>();
-        }
+        // public Genres() { 
+        //     MusicGenres = new HashSet<Musics>();
+        // }
 
         /// <summary>
         /// Primary key for the Genres' table
@@ -18,6 +21,7 @@
         /// <summary>
         /// The Genres' Title
         /// </summary>
+        [Display(Name = "Título")]
         public string Title { get; set; }
 
         // Navigation Properties

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Genres\Create.cshtml" />
+    <Content Remove="Views\Genres\Delete.cshtml" />
+    <Content Remove="Views\Genres\Details.cshtml" />
+    <Content Remove="Views\Genres\Edit.cshtml" />
     <Content Remove="Views\Home\Privacy.cshtml" />
   </ItemGroup>
 

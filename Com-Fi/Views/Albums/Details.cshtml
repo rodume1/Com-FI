@@ -4,10 +4,10 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Detalhes</h1>
 
 <div>
-    <h4>Albums</h4>
+    <h4>Álbuns</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -33,9 +33,24 @@
                 height="250"
             />
         </dd>
+
+        <dt class="col-sm-2">Músicas</dt>
+        <dd class="col-sm-10">
+            <ul>
+                @* musics in album *@
+                @foreach (var music in Model.AlbumMusics ?? Enumerable.Empty<Musics>())
+                {
+                    <li>
+                        @music.Title<br />
+                    </li>
+                }
+            </ul>
+
+        </dd>
+
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Editar</a> |
+    <a asp-action="Index">Voltar</a>
 </div>
