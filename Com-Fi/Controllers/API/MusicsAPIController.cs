@@ -23,16 +23,33 @@ namespace Com_Fi.Controllers.API
 
         // GET: api/MusicsAPI
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Musics>>> GetMusics()
+        public async Task<ActionResult<IEnumerable<MusicsViewModel>>> GetMusics()
         {
-            return await _context.Musics.ToListAsync();
+            return await _context.Musics
+                                .Select(m => new MusicsViewModel
+                                {
+                                    Id = m.Id,
+                                    Title = m.Title,
+                                    ReleaseYear = m.ReleaseYear,
+                                    GenreFK = m.GenreFK,                                    
+                                })
+                                .ToListAsync();
         }
 
         // GET: api/MusicsAPI/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Musics>> GetMusic(int id)
+        public async Task<ActionResult<MusicsViewModel>> GetMusic(int id)
         {
-            var music = await _context.Musics.FindAsync(id);
+            var music = await _context.Musics                                
+                                .Select(m => new MusicsViewModel
+                                {
+                                    Id = m.Id,
+                                    Title = m.Title,
+                                    ReleaseYear = m.ReleaseYear,
+                                    GenreFK = m.GenreFK,
+                                })
+                                .Where(m => m.Id == id)
+                                .FirstOrDefaultAsync();
 
             if (music == null)
             {

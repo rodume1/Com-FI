@@ -23,16 +23,29 @@ namespace Com_Fi.Controllers.API
 
         // GET: api/GenresAPI
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Genres>>> GetGenres()
+        public async Task<ActionResult<IEnumerable<GenresViewModel>>> GetGenres()
         {
-            return await _context.Genres.ToListAsync();
+            return await _context.Genres
+                                .Select(g => new GenresViewModel
+                                {
+                                    Id = g.Id,
+                                    Title = g.Title
+                                })
+                                .ToListAsync();
         }
 
         // GET: api/GenresAPI/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Genres>> GetGenre(int id)
-        {
-            var genre = await _context.Genres.FindAsync(id);
+        public async Task<ActionResult<GenresViewModel>> GetGenre(int id)
+        {            
+            var genre = await _context.Genres
+                                    .Select(g => new GenresViewModel
+                                    {
+                                        Id = g.Id,
+                                        Title = g.Title
+                                    })
+                                    .Where(g => g.Id == id)
+                                    .FirstOrDefaultAsync();
 
             if (genre == null)
             {
