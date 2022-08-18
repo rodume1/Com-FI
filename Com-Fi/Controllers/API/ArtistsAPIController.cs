@@ -23,16 +23,37 @@ namespace Com_Fi.Controllers.API
 
         // GET: api/ArtistsAPI
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Artists>>> GetArtists()
+        public async Task<ActionResult<IEnumerable<ArtistsViewModel>>> GetArtists()
         {
-            return await _context.Artists.ToListAsync();
+            // list of artists. each album follows ArtistViewModel structure
+            return await _context.Artists
+                                 .Select(a => new ArtistsViewModel
+                                 {
+                                     Id = a.Id,
+                                     Name = a.Name,
+                                     UserId = a.UserId,
+                                     Email = _context.Users.Where(u => u.Id == a.UserId).FirstOrDefault().Email,
+                                     RegistrationDate = _context.Users.Where(u => u.Id == a.UserId).FirstOrDefault().RegistrationDate
+                                 })
+                                 .ToListAsync();
         }
 
         // GET: api/ArtistsAPI/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Artists>> GetArtist(int id)
+        public async Task<ActionResult<ArtistsViewModel>> GetArtist(int id)
         {
-            var artist = await _context.Artists.FindAsync(id);
+            // artist that follows ArtistsViewModel structure
+            var artist = await _context.Artists
+                                       .Select(a => new ArtistsViewModel
+                                       {
+                                           Id = a.Id,
+                                           Name = a.Name,
+                                           UserId = a.UserId,
+                                           Email = _context.Users.Where(u => u.Id == a.UserId).FirstOrDefault().Email,
+                                           RegistrationDate = _context.Users.Where(u => u.Id == a.UserId).FirstOrDefault().RegistrationDate
+                                       })
+                                       .Where(a => a.Id == id)
+                                       .FirstOrDefaultAsync();
 
             if (artist == null)
             {

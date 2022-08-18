@@ -25,6 +25,7 @@ namespace Com_Fi.Controllers.API
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AlbumsViewModel>>> GetAlbums()
         {
+            // list of albums. each album follows AlbumsViewModel structure
             return await _context.Albums
                                  .Include(a => a.AlbumMusics)
                                  .Select(a => new AlbumsViewModel
@@ -41,6 +42,7 @@ namespace Com_Fi.Controllers.API
         [HttpGet("{id}")]
         public async Task<ActionResult<AlbumsViewModel>> GetAlbum(int id)
         {
+            // album that follows AlbumsViewModel structure
             var album = await _context.Albums
                                       .Include(a => a.AlbumMusics)
                                       .Select(a => new AlbumsViewModel

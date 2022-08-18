@@ -25,6 +25,7 @@ namespace Com_Fi.Controllers.API
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GenresViewModel>>> GetGenres()
         {
+            // list of genres. each album follows GenresViewModel structure
             return await _context.Genres
                                 .Select(g => new GenresViewModel
                                 {
@@ -37,7 +38,8 @@ namespace Com_Fi.Controllers.API
         // GET: api/GenresAPI/5
         [HttpGet("{id}")]
         public async Task<ActionResult<GenresViewModel>> GetGenre(int id)
-        {            
+        {
+            // genre that follows GenresViewModel structure
             var genre = await _context.Genres
                                     .Select(g => new GenresViewModel
                                     {
