@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Com_Fi.Controllers
 {
-    [Authorize(Roles = "Artist")]
     public class ArtistsController : Controller
     {
         /// <summary>
@@ -38,6 +37,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Artists
+        [Authorize(Roles = "User,Artist")]
         public async Task<IActionResult> Index(String errorMessage)
         {
             // if there is an error message, displays it to client
@@ -50,6 +50,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Artists/Details/5
+        [Authorize(Roles = "User,Artist")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Artists == null)
@@ -68,6 +69,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Artists/Create
+        [Authorize(Roles = "Artist")]
         public IActionResult Create()
         {
             return View();
@@ -90,6 +92,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Artists/Edit/5
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Edit(int? id)
         {
             // get user ID
@@ -126,6 +129,7 @@ namespace Com_Fi.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Artists artist)
         {
             // get user ID
@@ -193,6 +197,7 @@ namespace Com_Fi.Controllers
         }
 
         // GET: Artists/Delete/5
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Delete(int? id)
         {
             // get user ID
@@ -231,6 +236,7 @@ namespace Com_Fi.Controllers
         // POST: Artists/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Artist")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             // get user ID
