@@ -8,6 +8,6 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public int ReleaseYear { get; set; }
-        public int GenreFK { get; set; }
+        public Genres Genre { get; set; }
     }
 }
