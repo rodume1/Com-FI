@@ -49,7 +49,7 @@ namespace Com_Fi.Controllers.API
                                     Id = m.Id,
                                     Title = m.Title,
                                     ReleaseYear = m.ReleaseYear,
-                                    GenreFK = m.GenreFK,
+                                    Genre = _context.Genres.Where(g => g.Id == m.GenreFK).FirstOrDefault(),
                                 })
                                 .Where(m => m.Id == id)
                                 .FirstOrDefaultAsync();
