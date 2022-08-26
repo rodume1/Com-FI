@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Com_Fi.Data;
 using Com_Fi.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Com_Fi.Controllers.API
 {
@@ -15,10 +16,12 @@ namespace Com_Fi.Controllers.API
     public class ArtistsAPIController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ArtistsAPIController(ApplicationDbContext context)
+        public ArtistsAPIController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/ArtistsAPI
@@ -97,10 +100,39 @@ namespace Com_Fi.Controllers.API
         // POST: api/ArtistsAPI
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Artists>> PostArtist(Artists artist)
+        public async Task<ActionResult<Artists>> PostArtist([FromForm] ArtistsViewModel artistVM)
         {
-            _context.Artists.Add(artist);
-            await _context.SaveChangesAsync();
+            // create new user
+            var user = new ApplicationUser();
+            user.UserName = artistVM.Email;
+            user.Name = artistVM.Name;
+            user.Email = artistVM.Email;
+            user.RegistrationDate = DateTime.Now;
+
+            var result = await _userManager.CreateAsync(user, artistVM.Password);
+
+            // new artist (because what this api entrypoint expects are strings)
+            var artist = new Artists();
+            artist.Name = artistVM.Name;
+            artist.UserId = user.Id;
+
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "Artist");
+
+                try
+                {
+                    _context.Artists.Add(artist);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Não foi possível criar música");
+                }
+            } else
+            {
+                return BadRequest("Erro ao criar novo utilizador/artista.\nCertifique-se de que a palavra-chave contém (pelo menos) 1 caracter alfanumérico, 1 maíuscula e 1 minúscula.\nA palavra-chave tem de ter, pelo menos, 6 caracteres ");
+            }
 
             return CreatedAtAction("GetArtists", new { id = artist.Id }, artist);
         }
