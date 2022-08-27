@@ -8,12 +8,6 @@ namespace Com_Fi.Models
     /// </summary>
     public class Musics
     {
-        // Instance the lists of music genres & album musics
-        public Musics() { 
-            AlbumMusics = new HashSet<Albums>();
-            // MusicGenres = new HashSet<Genres>();
-        }
-
         /// <summary>
         /// Primary key for the Musics' table
         /// </summary>
@@ -34,11 +28,5 @@ namespace Com_Fi.Models
         [ForeignKey(nameof(Genres))]
         public int GenreFK { get; set; }
         public Genres Genre { get; set; }
-
-        // Navigation Properties
-        public ICollection<Albums> AlbumMusics { get; set; }
-
-        // public ICollection<Genres> MusicGenres { get; set; }
-
     }
 }
