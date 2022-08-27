@@ -33,7 +33,7 @@ namespace Com_Fi.Controllers.API
                                      Id = a.Id,
                                      Title = a.Title,
                                      ReleaseYear = a.ReleaseYear,
-                                     AlbumMusics = a.AlbumMusics.ToArray()
+                                     AlbumMusics = a.AlbumMusics.ToList()
                                  })
                                  .ToListAsync();
         }
@@ -50,7 +50,7 @@ namespace Com_Fi.Controllers.API
                                           Id = a.Id,
                                           Title = a.Title,
                                           ReleaseYear = a.ReleaseYear,
-                                          AlbumMusics = a.AlbumMusics.ToArray()
+                                          AlbumMusics = a.AlbumMusics.ToList()
                                       })
                                       .Where(a => a.Id == id)
                                       .FirstOrDefaultAsync();
@@ -97,10 +97,36 @@ namespace Com_Fi.Controllers.API
         // POST: api/Albums
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Albums>> PostAlbum(Albums album)
+        public async Task<ActionResult<Albums>> PostAlbum([FromForm] Albums album)
         {
-            _context.Albums.Add(album);
-            await _context.SaveChangesAsync();
+            // creates a new list to store musics IDs
+            List<int> auxMusics = new List<int>();
+
+            // list all musics and stores its ID
+            foreach (var music in album.AlbumMusics)
+            {
+                auxMusics.Add(music.Id);
+            }
+
+            // clears all album's musics
+            album.AlbumMusics.Clear();
+
+            // repopulates albums with musics
+            foreach (var music in auxMusics)
+            {
+                album.AlbumMusics.Add(_context.Musics.Where(m => m.Id == music).FirstOrDefault());
+            }
+
+            try
+            {
+                album.Cover = "defaultCover.jpg";
+                _context.Albums.Add(album);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Erro ao criar novo álbum");
+            }
 
             return CreatedAtAction("GetAlbums", new { id = album.Id }, album);
         }

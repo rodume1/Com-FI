@@ -8,6 +8,6 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public int ReleaseYear { get; set; }
-        public Array AlbumMusics { get; set; }
+        public List<Musics> AlbumMusics { get; set; }
     }
 }
