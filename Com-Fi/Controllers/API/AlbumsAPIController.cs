@@ -112,9 +112,11 @@ namespace Com_Fi.Controllers.API
             album.AlbumMusics.Clear();
 
             // repopulates albums with musics
-            foreach (var music in auxMusics)
+            foreach (var musicID in auxMusics)
             {
-                album.AlbumMusics.Add(_context.Musics.Where(m => m.Id == music).FirstOrDefault());
+                // get music by ID
+                Musics music = await _context.Musics.Where(m => m.Id == musicID).FirstOrDefaultAsync();
+                album.AlbumMusics.Add(music);
             }
 
             try
@@ -136,15 +138,23 @@ namespace Com_Fi.Controllers.API
         public async Task<IActionResult> DeleteAlbum(int id)
         {
             var album = await _context.Albums.FindAsync(id);
+
             if (album == null)
             {
-                return NotFound();
+                return BadRequest("Este álbum não existe");
             }
 
-            _context.Albums.Remove(album);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Albums.Remove(album);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Não foi possível eliminar este álbum");
+            }
 
-            return NoContent();
+            return Ok("Álbum eliminado com sucesso");
         }
 
         private bool AlbumExists(int id)

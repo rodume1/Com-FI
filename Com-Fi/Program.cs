@@ -1,6 +1,7 @@
 using Com_Fi.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>( //builder.Services.AddDefa
     options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()  // this is necessary to use 'Roles' in our app
     .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddControllersWithViews();
+
+// ignores circular referencing
+builder.Services.AddControllersWithViews().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
