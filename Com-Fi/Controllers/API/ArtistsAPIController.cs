@@ -139,16 +139,25 @@ namespace Com_Fi.Controllers.API
 
         // DELETE: api/ArtistsAPI/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteArtist(int id)
+        public async Task<IActionResult> DeleteArtist([FromForm] int id)
         {
             var artist = await _context.Artists.FindAsync(id);
-            if (artist == null)
-            {
-                return NotFound();
-            }
+            var user = await _userManager.FindByIdAsync(artist.UserId);
 
-            _context.Artists.Remove(artist);
-            await _context.SaveChangesAsync();
+            if (artist == null || user == null)
+            {
+                return BadRequest("Artista/Utilizador não encontrado");
+            }
+            try
+            {
+                _context.Artists.Remove(artist);
+                await _userManager.DeleteAsync(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Erro ao eliminar artista/utilizador");
+            }
 
             return NoContent();
         }
