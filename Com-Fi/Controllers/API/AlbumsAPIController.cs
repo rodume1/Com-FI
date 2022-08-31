@@ -60,6 +60,10 @@ namespace Com_Fi.Controllers.API
                 return NotFound();
             }
 
+            foreach (var music in album.AlbumMusics)
+            {
+                music.Genre = (Genres) await _context.Genres.SingleOrDefaultAsync(g => g.Id == music.GenreFK);
+            }
             return album;
         }
 
