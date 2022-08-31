@@ -70,32 +70,56 @@ namespace Com_Fi.Controllers.API
         // PUT: api/Albums/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAlbum(int id, Albums album)
+        public async Task<IActionResult> PutAlbum([FromForm] int id, [FromForm] AlbumsViewModel albumVM)
         {
-            if (id != album.Id)
+            if (id != albumVM.Id)
             {
-                return BadRequest();
+                return BadRequest("Este álbum não existe");
             }
 
-            _context.Entry(album).State = EntityState.Modified;
+            Albums album = await _context.Albums
+                                   .Include(a => a.AlbumMusics)
+                                   .SingleOrDefaultAsync(a => a.Id == id);
+
+            album.Title = albumVM.Title;
+            album.ReleaseYear = albumVM.ReleaseYear;
+            album.AlbumMusics.Clear();
+
+            // creates a new list to store musics IDs
+            List<int> auxMusics = new List<int>();
+
+            // list all musics and stores its ID
+            foreach (var music in albumVM.AlbumMusics)
+            {
+                auxMusics.Add(music.Id);
+            }
+
+            // repopulates albums with musics
+            foreach (var musicID in auxMusics)
+            {
+                // get music by ID
+                Musics music = await _context.Musics.Where(m => m.Id == musicID).FirstOrDefaultAsync();
+                album.AlbumMusics.Add(music);
+            }
 
             try
             {
+                _context.Update(album);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!AlbumExists(id))
                 {
-                    return NotFound();
+                    return BadRequest("Este álbum não existe");
                 }
                 else
                 {
-                    throw;
+                    return BadRequest("Erro ao editar álbum");
                 }
             }
 
-            return NoContent();
+            return Ok("Álbum editado com sucesso");
         }
 
         // POST: api/Albums
