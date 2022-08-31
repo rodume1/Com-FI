@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Com_Fi.Controllers.API
 {
+    /// <summary>
+    /// Web API controller that contains all entrypoints to handle Artists
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ArtistsAPIController : ControllerBase
@@ -24,7 +27,11 @@ namespace Com_Fi.Controllers.API
             _userManager = userManager;
         }
 
-        // GET: api/ArtistsAPI
+        /// <summary>
+        /// GET: api/ArtistsAPI
+        /// Returns all artists
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ArtistsViewModel>>> GetArtists()
         {
@@ -41,7 +48,12 @@ namespace Com_Fi.Controllers.API
                                  .ToListAsync();
         }
 
-        // GET: api/ArtistsAPI/5
+        /// <summary>
+        /// GET: api/ArtistsAPI/5
+        /// Returns one specific artist's info. Artist is identified by ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<ArtistsViewModel>> GetArtist(int id)
         {
@@ -58,6 +70,7 @@ namespace Com_Fi.Controllers.API
                                        .Where(a => a.Id == id)
                                        .FirstOrDefaultAsync();
 
+            // if artist does not exists, returns a NotFound
             if (artist == null)
             {
                 return NotFound();
@@ -66,8 +79,15 @@ namespace Com_Fi.Controllers.API
             return artist;
         }
 
-        // PUT: api/ArtistsAPI/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// PUT: api/ArtistsAPI/5
+        /// Edits one artist. Artist is identified by ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="artistVM"></param> artistVM is of type ArtistsViewModel so we can receive email in the request
+        /// An artist does not have email, but an user does. One user and one artist are correlated, that's why we need to change both
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutArtist([FromForm] int id, [FromForm] ArtistsViewModel artistVM)
         {
@@ -76,17 +96,22 @@ namespace Com_Fi.Controllers.API
                 return BadRequest();
             }
 
+            // gets user assigned to artist by ID
             var user = await _userManager.FindByIdAsync(artistVM.UserId);
 
+            // if user does not exist, then it returns a BadRequest
             if (user == null)
             {
                 return BadRequest("Utilizador não encontrado");
             }
 
+            // re-assigns to the user the new artists values
             user.Name = artistVM.Name;
             user.UserName = artistVM.Email;
             user.Email = artistVM.Email;
 
+            // updates the user values if successful
+            // if not, returns a BadRequest
             try
             {
                 await _userManager.UpdateAsync(user);
@@ -96,16 +121,21 @@ namespace Com_Fi.Controllers.API
                 return BadRequest("Erro ao editar utilizador/artista");
             }
 
+            // gets the artist by ID
             Artists artist = await _context.Artists
                                    .SingleOrDefaultAsync(a => a.Id == id);
 
+            // if artist does not exist, then it returns a badRequest
             if (artist == null)
             {
                 return BadRequest("Artista não encontrado");
             }
 
+            // re-assigns to the artists its new valeus
             artist.Name = artistVM.Name;
 
+            // updates the artist values if successful
+            // if not, returns a BadRequest
             try
             {
                 _context.Update(artist);
@@ -126,13 +156,19 @@ namespace Com_Fi.Controllers.API
             return NoContent();
         }
 
-        // POST: api/ArtistsAPI
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// POST: api/ArtistsAPI
+        /// Adds a new artist.
+        /// </summary>
+        /// <param name="artistVM"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<Artists>> PostArtist([FromForm] ArtistsViewModel artistVM)
         {
-            // create new user
+            // create new user, because an user and an artist are correlated
             var user = new ApplicationUser();
+            // assigns to the user the artists values
             user.UserName = artistVM.Email;
             user.Name = artistVM.Name;
             user.Email = artistVM.Email;
@@ -141,17 +177,23 @@ namespace Com_Fi.Controllers.API
             // to be holding "true" value in order to access the account
             user.EmailConfirmed = true;
 
+            // creates one user
             var result = await _userManager.CreateAsync(user, artistVM.Password);
 
-            // new artist (because what this api entrypoint expects are strings)
+            // new artist (because what this api entrypoint expects is an "artist" of the type ArtistsViewModel)
             var artist = new Artists();
+            // assigns the artist its values
             artist.Name = artistVM.Name;
             artist.UserId = user.Id;
 
+            // if it was possible to create an user, then assigns to it the role of Artist
+            // if not, returns a BadRequest
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(user, "Artist");
 
+                // creates one artist, if successful
+                // if not, returns a BadRequest
                 try
                 {
                     _context.Artists.Add(artist);
@@ -169,17 +211,29 @@ namespace Com_Fi.Controllers.API
             return CreatedAtAction("GetArtists", new { id = artist.Id }, artist);
         }
 
-        // DELETE: api/ArtistsAPI/5
+        /// <summary>
+        /// DELETE: api/ArtistsAPI/5
+        /// Deletes one artist, identified by ID
+        /// Deletes also its "assigned" user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArtist([FromForm] int id)
         {
+            // finds artist by id
             var artist = await _context.Artists.FindAsync(id);
+            // finds user by userID stored in the artist
             var user = await _userManager.FindByIdAsync(artist.UserId);
 
+            // if artist or user are not found, returns a BadRequest
             if (artist == null || user == null)
             {
                 return BadRequest("Artista/Utilizador não encontrado");
             }
+
+            // Deletes artist and user, if successful
+            // if not, returns a BadRequest
             try
             {
                 _context.Artists.Remove(artist);
@@ -194,6 +248,7 @@ namespace Com_Fi.Controllers.API
             return NoContent();
         }
 
+        // checks if one certain artist does exists
         private bool ArtistExists(int id)
         {
             return _context.Artists.Any(e => e.Id == id);

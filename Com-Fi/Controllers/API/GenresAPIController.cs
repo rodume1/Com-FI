@@ -10,6 +10,9 @@ using Com_Fi.Models;
 
 namespace Com_Fi.Controllers.API
 {
+    /// <summary>
+    /// Web API controller that contains all entrypoints to handle Genres
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class GenresAPIController : ControllerBase
@@ -21,7 +24,11 @@ namespace Com_Fi.Controllers.API
             _context = context;
         }
 
-        // GET: api/GenresAPI
+        /// <summary>
+        /// GET: api/GenresAPI
+        /// Returns all genres
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GenresViewModel>>> GetGenres()
         {
@@ -33,28 +40,6 @@ namespace Com_Fi.Controllers.API
                                     Title = g.Title
                                 })
                                 .ToListAsync();
-        }
-
-        // GET: api/GenresAPI/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<GenresViewModel>> GetGenre(int id)
-        {
-            // genre that follows GenresViewModel structure
-            var genre = await _context.Genres
-                                    .Select(g => new GenresViewModel
-                                    {
-                                        Id = g.Id,
-                                        Title = g.Title
-                                    })
-                                    .Where(g => g.Id == id)
-                                    .FirstOrDefaultAsync();
-
-            if (genre == null)
-            {
-                return NotFound();
-            }
-
-            return genre;
         }
     }
 }

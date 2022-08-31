@@ -10,6 +10,9 @@ using Com_Fi.Models;
 
 namespace Com_Fi.Controllers.API
 {
+    /// <summary>
+    /// Web API controller that contains all entrypoints to handle Albums
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AlbumsAPIController : ControllerBase
@@ -21,7 +24,11 @@ namespace Com_Fi.Controllers.API
             _context = context;
         }
 
-        // GET: api/Albums
+        /// <summary>
+        /// GET: api/Albums
+        /// Returns all Albums
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AlbumsViewModel>>> GetAlbums()
         {
@@ -38,7 +45,11 @@ namespace Com_Fi.Controllers.API
                                  .ToListAsync();
         }
 
-        // GET: api/Albums/5
+        /// <summary>
+        /// GET: api/Albums/5
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<AlbumsViewModel>> GetAlbum(int id)
         {
@@ -55,20 +66,29 @@ namespace Com_Fi.Controllers.API
                                       .Where(a => a.Id == id)
                                       .FirstOrDefaultAsync();
 
+            // if album does not exists, returns a NotFound
             if (album == null)
             {
                 return NotFound();
             }
 
+            // For each music in Album's albumMusics, it assigns the genre to that music
             foreach (var music in album.AlbumMusics)
             {
                 music.Genre = (Genres) await _context.Genres.SingleOrDefaultAsync(g => g.Id == music.GenreFK);
             }
+
             return album;
         }
 
-        // PUT: api/Albums/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// PUT: api/Albums/5
+        /// Edits one album. Album is identified by ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="albumVM"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAlbum([FromForm] int id, [FromForm] AlbumsViewModel albumVM)
         {
@@ -77,10 +97,12 @@ namespace Com_Fi.Controllers.API
                 return BadRequest("Este álbum não existe");
             }
 
+            // gets album by ID with it's AlbumMusics' list
             Albums album = await _context.Albums
                                    .Include(a => a.AlbumMusics)
                                    .SingleOrDefaultAsync(a => a.Id == id);
 
+            // assigns the album its values
             album.Title = albumVM.Title;
             album.ReleaseYear = albumVM.ReleaseYear;
             album.AlbumMusics.Clear();
@@ -102,6 +124,8 @@ namespace Com_Fi.Controllers.API
                 album.AlbumMusics.Add(music);
             }
 
+            // updates the album, if successful
+            // if not, returns a BadRequest
             try
             {
                 _context.Update(album);
@@ -122,8 +146,13 @@ namespace Com_Fi.Controllers.API
             return Ok("Álbum editado com sucesso");
         }
 
-        // POST: api/Albums
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// POST: api/Albums
+        /// Adds a new Album
+        /// </summary>
+        /// <param name="album"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<Albums>> PostAlbum([FromForm] Albums album)
         {
@@ -147,8 +176,11 @@ namespace Com_Fi.Controllers.API
                 album.AlbumMusics.Add(music);
             }
 
+            // creates a new album, if successful
+            // if not, returns a BadRequest
             try
             {
+                // assigns the defaultCover image
                 album.Cover = "defaultCover.jpg";
                 _context.Albums.Add(album);
                 await _context.SaveChangesAsync();
@@ -161,7 +193,12 @@ namespace Com_Fi.Controllers.API
             return CreatedAtAction("GetAlbums", new { id = album.Id }, album);
         }
 
-        // DELETE: api/Albums/5
+        /// <summary>
+        /// DELETE: api/Albums/5
+        /// Deletes one album, identified by ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAlbum(int id)
         {
@@ -185,6 +222,7 @@ namespace Com_Fi.Controllers.API
             return Ok("Álbum eliminado com sucesso");
         }
 
+        // checks if one certain album does exists
         private bool AlbumExists(int id)
         {
             return _context.Albums.Any(e => e.Id == id);

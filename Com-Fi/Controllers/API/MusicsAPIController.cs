@@ -11,6 +11,9 @@ using System.Net;
 
 namespace Com_Fi.Controllers.API
 {
+    /// <summary>
+    /// Web API controller that contains all entrypoints to handle Musics
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class MusicsAPIController : ControllerBase
@@ -22,7 +25,11 @@ namespace Com_Fi.Controllers.API
             _context = context;
         }
 
-        // GET: api/MusicsAPI
+        /// <summary>
+        /// GET: api/MusicsAPI
+        /// Returns all musics
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MusicsViewModel>>> GetMusics()
         {
@@ -36,116 +43,6 @@ namespace Com_Fi.Controllers.API
                                     Genre = _context.Genres.Where(g => g.Id == m.GenreFK).FirstOrDefault(),
                                 })
                                 .ToListAsync();
-        }
-
-        // GET: api/MusicsAPI/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MusicsViewModel>> GetMusic(int id)
-        {
-            // music that follows AlbumsViewModel structure
-            var music = await _context.Musics                                
-                                .Select(m => new MusicsViewModel
-                                {
-                                    Id = m.Id,
-                                    Title = m.Title,
-                                    ReleaseYear = m.ReleaseYear,
-                                    Genre = _context.Genres.Where(g => g.Id == m.GenreFK).FirstOrDefault(),
-                                })
-                                .Where(m => m.Id == id)
-                                .FirstOrDefaultAsync();
-
-            if (music == null)
-            {
-                return NotFound();
-            }
-
-            return music;
-        }
-
-        // PUT: api/MusicsAPI/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMusic(int id, Musics music)
-        {
-            if (id != music.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(music).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MusicExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/MusicsAPI
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Musics>> PostMusic([FromForm] Musics music)
-        {
-            if (music.Title == null || music.Title.Trim() == "")
-            {
-                return BadRequest("Título Inválido");
-            }
-
-            if (music.ReleaseYear < 0 || music.ReleaseYear > DateTime.Now.Year)
-            {
-                return BadRequest("Ano de lançamento inválido");
-            }
-
-            var genre = await _context.Genres.Where(g => g.Id == music.GenreFK).FirstOrDefaultAsync();
-            if (genre == null)
-            {
-                return BadRequest("Género inválido");
-            }
-
-            try
-            {
-                _context.Musics.Add(music);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                return BadRequest("Não foi possível criar música");
-            }
-
-            return CreatedAtAction("GetMusics", new { id = music.Id }, music);
-        }
-
-        // DELETE: api/MusicsAPI/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMusic(int id)
-        {
-            var music = await _context.Musics.FindAsync(id);
-            if (music == null)
-            {
-                return NotFound();
-            }
-
-            _context.Musics.Remove(music);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MusicExists(int id)
-        {
-            return _context.Musics.Any(e => e.Id == id);
         }
     }
 }
