@@ -44,5 +44,39 @@ namespace Com_Fi.Controllers.API
                                 })
                                 .ToListAsync();
         }
+
+        // POST: api/MusicsAPI
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Musics>> PostMusic([FromForm] Musics music)
+        {
+            if (music.Title == null || music.Title.Trim() == "")
+            {
+                return BadRequest("Título Inválido");
+            }
+
+            if (music.ReleaseYear < 0 || music.ReleaseYear > DateTime.Now.Year)
+            {
+                return BadRequest("Ano de lançamento inválido");
+            }
+
+            var genre = await _context.Genres.Where(g => g.Id == music.GenreFK).FirstOrDefaultAsync();
+            if (genre == null)
+            {
+                return BadRequest("Género inválido");
+            }
+
+            try
+            {
+                _context.Musics.Add(music);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Não foi possível criar música");
+            }
+
+            return CreatedAtAction("GetMusics", new { id = music.Id }, music);
+        }
     }
 }
